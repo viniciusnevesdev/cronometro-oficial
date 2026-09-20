@@ -51,6 +51,8 @@ const ASSETS=[
   "./cronometro-v088-ultra-visual.js",
   "./cronometro-v090-settings.css",
   "./cronometro-v090-settings.js",
+  "./cronometro-v091-client-directory.css",
+  "./cronometro-v091-client-directory.js",
   "./environment.json",
   "./environments.json",
   "./estrutura.svg",
