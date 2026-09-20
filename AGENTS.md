@@ -41,3 +41,26 @@ Não:
   - quais arquivos foram modificados;
   - quais testes foram executados;
   - se algo ainda precisa de validação manual.
+
+
+## Relatórios para o ChatGPT
+
+Ao concluir qualquer tarefa substancial de análise, implementação, correção ou revisão:
+
+1. Gere um relatório completo em Markdown em `/tmp/codex-report.md`.
+2. O relatório deve incluir, quando aplicável:
+   - resumo do trabalho;
+   - arquivos modificados/adicionados;
+   - decisões técnicas importantes;
+   - testes/verificações executados e resultados;
+   - erros ou limitações;
+   - estado do Git;
+   - SHA de eventual commit;
+   - conclusão e recomendação para o próximo passo.
+3. Publique o relatório executando:
+   `tools/publish_codex_report.sh /tmp/codex-report.md <slug-curto>`
+4. O script publica somente `.codex-reports/latest.md` e uma cópia histórica na branch `codex-reports`.
+5. O push para `codex-reports` está previamente autorizado apenas para relatórios.
+6. Não envie alterações funcionais do aplicativo para `codex-reports`.
+7. Não faça merge de `codex-reports` em `development` ou `main`.
+8. Regras normais de autorização continuam valendo para push de código em `development`, `main`, deploy ou publicação.
