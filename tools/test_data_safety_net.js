@@ -83,16 +83,18 @@ function migrationContext(fixture){
     persistCurrent:async()=>{writes.push(['state:current',clone(context.data.current)]);},
     modelById:id=>context.data.models.find(model=>model.id===id),
     timerDuration:(timer,at)=>timer.intervals.reduce((sum,interval)=>sum+Math.max(0,(interval.endedAt??at)-interval.startedAt),0),
+    sessionTotal:session=>(session.timers||[]).reduce((sum,timer)=>sum+context.timerDuration(timer,session.savedAt),0),
     activeModels:()=>context.data.models.filter(model=>!model.deletedAt),
-    fmtDateTime:()=>'',esc:value=>String(value??''),svgIcon:()=>'',shell:value=>value,
-    applyTheme:()=>{},render:()=>{},document:{querySelector:()=>null,querySelectorAll:()=>[],getElementById:()=>null},
-    window:{visualViewport:null},requestAnimationFrame:callback=>callback(),confirm:()=>false,alert:()=>{}
+    recordDateMs:session=>session.originalRecordedAt??session.savedAt??0,fmtDate:()=>'',fmtDateTime:()=>'',esc:value=>String(value??''),svgIcon:()=>'',shell:value=>value,
+    applyTheme:()=>{},renderSettings:()=>'',renderClientProfile:()=>'',render:()=>{},document:{querySelector:()=>null,querySelectorAll:()=>[],getElementById:()=>null},
+    window:{visualViewport:null,open:()=>{}},requestAnimationFrame:callback=>callback(),confirm:()=>false,alert:()=>{},toast:()=>{},iosTextPrompt:async()=>null
   };
   context.globalThis=context;
   vm.createContext(context);
   vm.runInContext(read('cronometro-v080-06.js'),context,{filename:'cronometro-v080-06.js'});
   vm.runInContext(read('cronometro-v082-01.js'),context,{filename:'cronometro-v082-01.js'});
   vm.runInContext(read('cronometro-v082-02.js'),context,{filename:'cronometro-v082-02.js'});
+  vm.runInContext(read('cronometro-v091-client-directory.js'),context,{filename:'cronometro-v091-client-directory.js'});
   return {context,writes};
 }
 
@@ -141,6 +143,46 @@ async function migrationTests(){
   assert.equal(created.id,'client-ana','cadastro usa equivalência normalizada somente dentro da mesma área');
   const another=await context.createClient('Ana Silva','area-house');
   assert.notEqual(another.id,'client-ana','clientes de áreas diferentes continuam entidades distintas');
+  await clientDirectoryTests(context);
+}
+
+async function clientDirectoryTests(context){
+  context.ui.clientDirectoryAreaId='area-care';
+  assert.deepEqual(clone(context.clientDirectoryAreas().map(area=>area.id)).sort(),['area-care'],'diretório só oferece áreas do tipo clients');
+  assert.match(context.clientDirectoryRows('Ana','area-care'),/Ana Silva/,'busca encontra cliente existente');
+  assert.doesNotMatch(context.clientDirectoryRows('Ana','area-care'),/Ana Silva[\s\S]*Anna Silva/,'nomes semelhantes permanecem entradas distintas e ordenadas');
+  assert.equal(context.areaType('area-house'),'generic','área genérica permanece intacta e fora do seletor do diretório');
+
+  let answers=['Bruno Lima','(11) 99999-0000'];
+  context.iosTextPrompt=async()=>answers.shift();
+  await context.createDirectoryClient();
+  const created=context.data.settings.clients.find(client=>client.name==='Bruno Lima');
+  assert.ok(created,'diretório cria cliente novo');
+  assert.equal(created.areaId,'area-care');
+  assert.equal(created.createdAt,1800000000000,'cliente novo recebe data real de criação');
+  assert.equal(created.whatsapp,'(11) 99999-0000');
+  const totalAfterCreate=context.data.settings.clients.length;
+  answers=['Bruno Lima'];context.iosTextPrompt=async()=>answers.shift();
+  await context.createDirectoryClient();
+  assert.equal(context.data.settings.clients.length,totalAfterCreate,'criação repetida não duplica cliente existente');
+
+  const originalTitle=context.data.sessions.find(session=>session.id==='session-client-existing').title;
+  answers=['Ana S.','(11) 98888-0000'];context.iosTextPrompt=async()=>answers.shift();
+  await context.editDirectoryClient('client-ana');
+  assert.equal(context.clientById('client-ana').name,'Ana S.','edição atualiza o cadastro');
+  assert.equal(context.data.sessions.find(session=>session.id==='session-client-existing').clientNameSnapshot,'Ana S.','edição atualiza snapshot de relação');
+  assert.equal(context.data.sessions.find(session=>session.id==='session-client-existing').title,originalTitle,'edição não altera título histórico');
+  answers=['Anna Silva'];context.iosTextPrompt=async()=>answers.shift();
+  await context.editDirectoryClient('client-ana');
+  assert.equal(context.clientById('client-ana').name,'Ana S.','edição não une clientes com nomes semelhantes');
+  assert.equal(context.clientById('client-anna').createdAt,null,'cliente legado sem createdAt permanece sem data inventada');
+
+  context.confirm=()=>true;
+  const sessionBefore=clone(context.data.sessions.find(session=>session.id==='session-client-existing'));
+  await context.deleteDirectoryClient('client-ana');
+  assert.ok(context.clientById('client-ana').deletedAt,'exclusão é lógica');
+  assert.deepEqual(clone(context.data.sessions.find(session=>session.id==='session-client-existing')),sessionBefore,'exclusão não apaga nem desvincula histórico');
+  assert.equal(context.clientDirectoryClients('', 'area-care').some(client=>client.id==='client-ana'),false,'cliente excluído sai da lista ativa');
 }
 
 function memoryBackupContext(seed){

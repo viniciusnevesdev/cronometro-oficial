@@ -45,6 +45,8 @@ arquitetura:
 - `cronometro-v087-data-backup.*`: interface de backup;
 - `cronometro-v088-ultra-visual.*`: modos Clássico e Ultra;
 - `cronometro-v090-settings.*`: organização atual dos ajustes.
+- `cronometro-v091-client-directory.*`: diretório de clientes por área de
+  atendimentos, sem alterar áreas genéricas.
 
 Arquivos auxiliares relevantes:
 
