@@ -114,9 +114,17 @@ for file in *.js; do node --check "$file"; done
 git diff --check
 ```
 
-Não há suíte de testes automatizados versionada no `cronometro-oficial` neste
-momento. Os testes do projeto de referência não fazem parte deste repositório
-nem devem ser usados como substituto de testes do aplicativo Oficial.
+Os contratos de segurança de dados podem ser executados sem navegador ou
+rede:
+
+```bash
+node tools/test_data_safety_net.js
+```
+
+Eles usam somente fixtures sintéticas e uma store em memória para cobrir o
+schema, áreas, clientes, sessões, backups e invariantes de migração
+conservadora. Os testes do projeto de referência não fazem parte deste
+repositório nem substituem os testes do aplicativo Oficial.
 
 Antes de uma alteração que afete formato de dados, exporte um backup JSON.
 Nunca corrija problemas removendo `cronometro_local_v1`.
