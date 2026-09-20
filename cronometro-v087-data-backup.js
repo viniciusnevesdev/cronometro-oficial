@@ -15,21 +15,19 @@ function backupDateLabel(ms){
 }
 function backupAgeInfo(){
   const raw=Number(data.settings.lastBackupExportAt||0);
-  if(!raw||!Number.isFinite(raw))return {tone:'stale',title:'Backup ainda não registrado',text:'O app ainda não registrou um backup externo criado por você.',subtitle:'Nenhum backup externo registrado'};
+  if(!raw||!Number.isFinite(raw))return {tone:'stale',subtitle:'Nenhum backup registrado'};
   const age=Math.max(0,now()-raw),days=Math.floor(age/86400000);
   const when=days===0?'hoje':days===1?'ontem':`há ${days} dias`;
   const dated=backupDateLabel(raw);
-  if(days<7)return {tone:'ok',title:'Backup em dia',text:`Último backup criado ${when}.`,subtitle:`Último backup: ${dated}`};
-  if(days<14)return {tone:'warn',title:'Lembrete de backup',text:`O último backup foi criado ${when}. Talvez seja uma boa hora para criar outro.`,subtitle:`Último backup: ${dated}`};
-  return {tone:'stale',title:'Backup desatualizado',text:`Já faz ${days} dias desde o último backup externo.`,subtitle:`Último backup: ${dated}`};
+  if(days<7)return {tone:'ok',subtitle:`Último backup: ${when==='hoje'?'hoje':dated}`};
+  return {tone:'warn',subtitle:`Último backup há ${days} dias`};
 }
 function renderDataBackupSectionV087(){
   const info=backupAgeInfo();
   return `<section class="settings-section data-backup-section"><h3 class="section-label">Dados</h3>
-    <div class="backup-alert ${info.tone}"><span class="backup-alert-icon">${backupAlertIcon()}</span><span class="backup-alert-copy"><strong class="backup-alert-title">${esc(info.title)}</strong><span class="backup-alert-text">${esc(info.text)}</span></span></div>
-    <div class="data-backup-card">
-      <button class="data-backup-row" id="exportJson"><span class="data-backup-row-icon">${backupShareIcon()}</span><span class="data-backup-row-copy"><strong class="data-backup-row-title">Exportar dados</strong><span class="data-backup-row-subtitle">${esc(info.subtitle)}</span></span><span class="data-backup-chevron">${backupChevron()}</span></button>
-      <label class="data-backup-row data-backup-file-label" for="importJsonFile"><span class="data-backup-row-icon">${backupImportIcon()}</span><span class="data-backup-row-copy"><strong class="data-backup-row-title">Importar dados</strong><span class="data-backup-row-subtitle">Substitui os dados atuais pelo conteúdo do backup JSON</span></span><span class="data-backup-chevron">${backupChevron()}</span><input id="importJsonFile" class="sr-only" type="file" accept="application/json,.json"></label>
+    <div class="data-backup-card ${info.tone}">
+      <button class="data-backup-row" id="exportJson"><span class="data-backup-row-icon">${backupShareIcon()}</span><span class="data-backup-row-copy"><strong class="data-backup-row-title">Exportar backup</strong><span class="data-backup-row-subtitle">${esc(info.subtitle)}</span></span><span class="data-backup-chevron">${backupChevron()}</span></button>
+      <label class="data-backup-row data-backup-file-label" for="importJsonFile"><span class="data-backup-row-icon">${backupImportIcon()}</span><span class="data-backup-row-copy"><strong class="data-backup-row-title">Restaurar backup</strong><span class="data-backup-row-subtitle">Substitui os dados atuais pelo conteúdo do backup JSON</span></span><span class="data-backup-chevron">${backupChevron()}</span><input id="importJsonFile" class="sr-only" type="file" accept="application/json,.json"></label>
     </div>
     <p class="data-backup-footnote">O backup JSON inclui registros, modelos, áreas, clientes e personalizações do aplicativo.</p>
   </section>

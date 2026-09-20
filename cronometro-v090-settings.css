@@ -1,0 +1,5 @@
+/* v0.9.0 — evita cabeçalhos flutuantes e compacta Ajustes no iPhone. */
+.topbar,.models-header{position:relative!important;top:auto!important;min-height:46px!important;padding-top:max(4px,env(safe-area-inset-top))!important;padding-bottom:5px!important}
+.settings-v090{padding-top:5px}.theme-mode-card{padding:6px!important}.theme-mode-segment{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;padding:3px;border-radius:13px;background:var(--bg)}.theme-mode-segment button{min-height:34px;border:0;border-radius:10px;background:transparent;color:var(--secondary);font-size:13px;font-weight:650}.theme-mode-segment button.selected{background:var(--card);color:var(--accent);box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.settings-version-v090{margin:23px 0 calc(10px + env(safe-area-inset-bottom));text-align:center;color:var(--secondary);font-size:12px}.settings-v090 .settings-row>span:first-child{min-width:0;white-space:nowrap;font-size:clamp(13px,3.7vw,15px)}
+.data-backup-card.warn,.data-backup-card.stale{background:color-mix(in srgb,#E7B36D 12%,var(--card));border:1px solid color-mix(in srgb,#C8944E 28%,transparent)}

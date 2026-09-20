@@ -9,8 +9,11 @@ ROOT = Path(__file__).resolve().parent
 STABLE_SITE = ROOT / '_stable_site'
 BETA_SOURCE = ROOT / '_beta_site'
 SITE = ROOT / 'site'
-STABLE_RELEASE = os.environ.get('STABLE_RELEASE','0.8.8').strip()
-BETA_LABEL = os.environ.get('BETA_LABEL','0.8.9-beta.3').strip()
+ENVIRONMENTS = json.loads((ROOT / 'environments.json').read_text(encoding='utf-8'))
+STABLE_RELEASE = os.environ.get('STABLE_RELEASE', ENVIRONMENTS['official']['release']).strip()
+BETA_LABEL = os.environ.get('BETA_LABEL', ENVIRONMENTS['beta']['release']).strip()
+if STABLE_RELEASE != ENVIRONMENTS['official']['release'] or BETA_LABEL != ENVIRONMENTS['beta']['release']:
+    raise SystemExit('Publicação bloqueada: versão do workflow diverge de environments.json')
 
 if not (STABLE_SITE / 'index.html').exists():
     raise SystemExit('Build Oficial ausente em _stable_site')
@@ -127,7 +130,7 @@ function relPath(url){{
 }}
 function isSpecialNavigation(url){{
   const rel=relPath(url);
-  if(!BETA_MODE&&rel.startsWith('beta/'))return true;
+  if(!BETA_MODE&&(rel.startsWith('beta/')||rel.startsWith('simple/')))return true;
   return rel==='menu.html'||rel.startsWith('menu/')||rel.startsWith('diagnostico/')||rel==='launch.html'||rel==='recover.html'||rel==='safe.html';
 }}
 async function networkFirst(request, fallbackIndex=false){{
@@ -274,6 +277,26 @@ write_json(beta / 'environment.json', {
     'service_worker_registration':'disabled-during-development'
 })
 
+# Variante simples: pacote independente e banco próprio. A camada simple-mode
+# remove a semântica de áreas/clientes; não é a versão Oficial disfarçada.
+simple = SITE / 'simple'
+if simple.exists(): shutil.rmtree(simple)
+shutil.copytree(BETA_SOURCE, simple)
+simple_core=simple/'cronometro-v080-01.js'
+simple_text=simple_core.read_text(encoding='utf-8')
+if needle not in simple_text: raise SystemExit('DB Oficial não localizado para variante simples')
+simple_core.write_text(simple_text.replace(needle, "const DB_NAME='cronometro_simple_v1';", 1), encoding='utf-8')
+shutil.copy2(ROOT/'simple-mode.js', simple/'simple-mode.js')
+simple_idx=(simple/'index.html').read_text(encoding='utf-8').replace('<title>Cronômetro</title>','<title>Cronômetro Simples</title>',1)
+simple_idx=simple_idx.replace('</body>','  <script src="./simple-mode.js"></script>\n</body>',1)
+(simple/'index.html').write_text(simple_idx,encoding='utf-8')
+simple_release=ENVIRONMENTS['simple']['release']
+inject_boot(simple/'index.html',simple_release,False)
+build_manifest(simple/'manifest.webmanifest','Cronômetro Simples','./app-icon-192.png','./app-icon-192.png')
+write_json(simple/'version.json',{'version':simple_release})
+write_json(simple/'environment.json',{'environment':'simple','release':simple_release,'database':'cronometro_simple_v1','areas':False,'clients':False})
+(simple/'sw.js').write_text(service_worker_text(f'cronometro-simple-{simple_release}',root_assets(simple,False),True),encoding='utf-8')
+
 # -------------------------------------------------------------------
 # MENU CENTRAL — HTML independente, sem motor do app ou acesso ao banco.
 # -------------------------------------------------------------------
@@ -284,10 +307,12 @@ def menu_html(prefix: str):
 :root{{--bg:#0d0f17;--card:#171924;--card2:#1e2130;--text:#f7f7fb;--muted:#9b9dad;--line:#2b2e40;--violet:#a784ff;--blue:#64a8ff;--green:#55d879;--orange:#ffad38}}
 *{{box-sizing:border-box}}html,body{{margin:0;width:100%;max-width:100%;min-height:100%;overflow-x:hidden;background:radial-gradient(circle at 78% -10%,rgba(108,92,255,.13),transparent 34%),var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif}}body{{min-height:100dvh}}main{{width:min(100%,500px);margin:0 auto;padding:calc(24px + env(safe-area-inset-top)) 16px calc(38px + env(safe-area-inset-bottom))}}header{{padding:3px 4px 20px}}.headrow{{display:flex;align-items:center;gap:13px;margin-bottom:8px}}.headicon{{width:54px;height:54px;border-radius:16px;overflow:hidden;flex:0 0 54px;box-shadow:0 6px 22px rgba(102,92,255,.14)}}.headicon img{{width:100%;height:100%;display:block}}h1{{font-size:30px;line-height:1.05;margin:0;letter-spacing:-.035em}}.lead{{margin:0;color:var(--muted);font-size:13.5px;line-height:1.45}}.section-title{{margin:22px 4px 9px;font-size:11.5px;letter-spacing:.085em;text-transform:uppercase;color:#74778a;font-weight:780}}.grid{{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}}.card{{display:flex;width:100%;min-width:0;overflow:hidden;align-items:center;gap:12px;text-decoration:none;color:inherit;background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:19px;padding:14px;min-height:80px;-webkit-tap-highlight-color:transparent;transition:transform .12s ease,border-color .12s ease}}.card:active{{transform:scale(.985);border-color:#52566d}}.card.wide{{grid-column:1/-1}}.app-card{{align-items:flex-start;min-height:116px;padding:15px}}.icon{{width:48px;height:48px;flex:0 0 48px;border-radius:13px;display:grid;place-items:center;background:#272a39;border:1px solid #35394c;overflow:hidden}}.app-card .icon{{width:60px;height:60px;flex-basis:60px;border-radius:17px;background:transparent;border:0}}.icon img{{width:100%;height:100%;display:block;object-fit:cover}}.icon svg{{width:27px;height:27px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}}.copy{{min-width:0;flex:1;overflow:hidden}}.copy strong{{display:flex;flex-wrap:wrap;overflow-wrap:anywhere;align-items:center;gap:7px;font-size:15px;line-height:1.2;margin-bottom:4px}}.copy small{{display:block;color:var(--muted);font-size:11.4px;line-height:1.36;overflow-wrap:anywhere}}.tag{{display:inline-flex;align-items:center;padding:3px 7px;border-radius:999px;font-size:9px;line-height:1;background:#332a59;color:#c9bdff;font-weight:820;letter-spacing:.035em}}.tag.stable{{background:#173a22;color:#87e69a}}.tag.beta{{background:#3b2373;color:#d0b5ff}}.arrow{{color:#717486;font-size:23px;margin-left:auto}}.note{{margin:18px 4px 0;padding:13px 14px;border-radius:15px;background:#151721;border:1px solid var(--line);color:var(--muted);font-size:12px;line-height:1.45}}.note strong{{color:var(--text)}}@media(max-width:350px){{.grid{{grid-template-columns:1fr}}.card.wide{{grid-column:auto}}}}
 </style></head><body><main>
-<header><div class="headrow"><span class="headicon"><img src="{prefix}app-icon-192.png" alt=""></span><div><h1>Cronômetro</h1><p class="lead">Menu de ambientes, testes e recuperação.</p></div></div></header>
+<header><div class="headrow"><span class="headicon"><img src="{prefix}app-icon-192.png" alt=""></span><div><h1>Cronômetro</h1></div></div></header>
 <div class="section-title">Apps</div><div class="grid">
 <a class="card app-card" href="{prefix}"><span class="icon"><img src="{prefix}app-icon-192.png" alt=""></span><span class="copy"><strong>Oficial <span class="tag stable">ESTÁVEL</span></strong><small>Uso diário · v{STABLE_RELEASE}<br>Dados reais.</small></span></a>
 <a class="card app-card" href="{prefix}beta/"><span class="icon"><img src="{prefix}beta/app-icon-beta-192.png" alt=""></span><span class="copy"><strong>Beta <span class="tag beta">BETA</span></strong><small>Testes · v{BETA_LABEL}<br>Dados isolados.</small></span></a>
+<a class="card app-card wide" href="{ENVIRONMENTS['uze']['stableUrl']}"><span class="icon"><img src="{prefix}app-icon-192.png" alt=""></span><span class="copy"><strong>Apresentação UZE</strong><small>Versão estável · abrir apresentação</small></span><span class="arrow">›</span></a>
+<a class="card app-card wide" href="{ENVIRONMENTS['uze']['betaUrl']}"><span class="icon"><img src="{prefix}app-icon-beta-192.png" alt=""></span><span class="copy"><strong>Apresentação UZE Beta</strong><small>Testes isolados · disponível após publicação</small></span><span class="arrow">›</span></a>
 </div>
 <div class="section-title">Diagnóstico</div><div class="grid"><a class="card wide" href="{prefix}diagnostico/"><span class="icon" style="color:var(--violet)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l2.5 1.5"/><path d="M4 4l2 2M20 4l-2 2M4 20l2-2M20 20l-2-2"/></svg></span><span class="copy"><strong>Central de Diagnóstico</strong><small>Versão, cache, Service Worker, armazenamento e erros.</small></span><span class="arrow">›</span></a></div>
 <div class="section-title">Ferramentas do Oficial</div><div class="grid">
@@ -389,6 +414,8 @@ checks={
     'SW Oficial não interfere na Beta':"rel.startsWith('beta/')" in root_sw,
     'Recuperação não apaga DB':'indexedDB.deleteDatabase' not in (SITE/'recover.html').read_text(encoding='utf-8'),
     'Beta claramente identificada':'Cronômetro Beta' in beta_index and (beta/'app-icon-beta-192.png').exists(),
+    'Simples usa DB isolado':"const DB_NAME='cronometro_simple_v1';" in (simple/'cronometro-v080-01.js').read_text(encoding='utf-8'),
+    'Simples sem áreas/clientes':(simple/'simple-mode.js').exists() and 'areas' in (simple/'environment.json').read_text(encoding='utf-8'),
 }
 failed=[name for name,ok in checks.items() if not ok]
 for name,ok in checks.items():print(f"[{'OK' if ok else 'FALHA'}] {name}")

@@ -12,10 +12,6 @@ concurrency:
   group: "cronometro-publicacao-main"
   cancel-in-progress: true
 
-env:
-  STABLE_RELEASE: "0.8.9"
-  BETA_LABEL: "0.8.9-beta.22"
-
 jobs:
   build-and-sync-main:
     runs-on: ubuntu-latest
@@ -40,6 +36,15 @@ jobs:
           ref: stable
           path: _stable
           persist-credentials: false
+
+      - name: Carregar versões canônicas
+        run: |
+          python3 - <<'PY' >> "$GITHUB_ENV"
+          import json
+          env=json.load(open('_dev/environments.json', encoding='utf-8'))
+          print('STABLE_RELEASE='+env['official']['release'])
+          print('BETA_LABEL='+env['beta']['release'])
+          PY
 
       - name: Preparar ferramentas de ícone
         run: |
