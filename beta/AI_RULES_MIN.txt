@@ -18,4 +18,4 @@ UI=pt-BR; iPhone vertical; visual iOS atual/Liquid Glass. Tema Sistema/Claro/Esc
 SHEETS=bottom sheet full-width, backdrop ~13%, bg var(--bg), corners ~52px; header título 20 bold; controles circulares glass ~52px; cards inset grouped margem18 radius30, sem sombra/borda; rows ~56, separator #E7E7E8; fonte system/SF; placeholder #C5C5C7. Popovers: fechar ao tocar fora; sombra difusa mínima+borda branca fina. Settings=inset grouped; footer fora do card 14–15px line-height 18–20. Toggle, se usado: track72x32 r16 ON#65C466 OFF#C5C5C7 thumb35x28 branco. Sem Material, emoji, sombra forte ou controle HTML sem estilização.
 
 SEGURANCA=alterar só necessário; não remover/simplificar silenciosamente. Se conflito de requisitos, perguntar qual prevalece antes de aplicar. Não afirmar teste real iPhone/offline sem testar.
-ARQUIVOS_RUNTIME=index.html,app.js,styles.css,sw.js,manifest.webmanifest,icon.svg. DOC=README.md. Este arquivo acompanha edição por IA.
+ARQUIVOS_RUNTIME=index.html,cronometro-v080-01.js,cronometro-v080-09.js,sw.js,manifest.webmanifest,icon.svg. DOC=README.md. Este arquivo acompanha edição por IA.
