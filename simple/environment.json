@@ -1,0 +1,7 @@
+{
+  "environment": "simple",
+  "release": "0.8.9-simple.1",
+  "database": "cronometro_simple_v1",
+  "areas": false,
+  "clients": false
+}

@@ -1,0 +1,24 @@
+/* v0.9.0 — central compacta de Ajustes. Camada final, sem alterar dados. */
+function renderAreasSettingsV090(){
+  const areas=getAreas();
+  return shell(`<header class="topbar simple section-tab-header appearance-header"><button class="appearance-back" id="closeAreasSettings">${svgIcon('back')}</button><h1>Áreas</h1><span></span></header><main class="settings-content"><section class="settings-section"><div class="settings-card"><div class="settings-row"><span>Área ativa</span><strong>${esc(activeArea().name)}</strong></div>${areas.map(a=>`<div class="settings-row area-manage-row"><span><strong>${esc(a.name)}</strong><span class="area-type-pill">${esc(areaTypeLabel(a.type))}</span></span><span class="area-actions"><button data-rename-area="${a.id}">Renomear</button><button data-change-area-type="${a.id}">Tipo</button>${a.id!=='general'?`<button class="danger" data-delete-area="${a.id}">Excluir</button>`:''}</span></div>`).join('')}<button class="settings-row button-row accent-button-row" id="addArea"><span>Adicionar área</span></button></div></section></main>`);
+}
+function renderSettingsV090(){
+  if(ui.settingsView==='areas')return renderAreasSettingsV090();
+  if(ui.settingsView==='sound')return renderTimerSoundSettings();
+  if(ui.settingsView==='appearance'||ui.settingsView==='advanced'||ui.settingsView==='bottomBarLab')return __renderSettingsV090Base();
+  const theme=data.settings.theme||'system',release=String(window.APP_RELEASE||APP_META.version||'');
+  const music='<svg class="sf-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l10-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="16" cy="16" r="3"/></svg>';
+  return shell(`<header class="topbar section-tab-header"><h1>Ajustes</h1></header><main class="settings-content settings-v090"><section class="settings-section"><div class="settings-card theme-mode-card"><div class="theme-mode-segment" role="group" aria-label="Tema">${[['system','Sistema'],['light','Claro'],['dark','Escuro']].map(([id,label])=>`<button data-theme-choice="${id}" class="${theme===id?'selected':''}">${label}</button>`).join('')}</div></div></section><section class="settings-section"><div class="settings-card settings-navigation-card"><button class="settings-row button-row" id="openSoundSettings"><span>${music} Som do cronômetro</span><span class="secondary-value">${data.settings.timerSoundEnabled?'Ativado':'Desativado'} ›</span></button><button class="settings-row button-row" id="openAppearanceSettings"><span>Aparência</span><span class="secondary-value">Clássico, Ultra e ícones ›</span></button><button class="settings-row button-row" id="openAreasSettings"><span>Áreas</span><span class="secondary-value">${esc(activeArea().name)} ›</span></button></div></section>${renderDataBackupSectionV087()}<section class="settings-section"><h3 class="section-label">Armazenamento</h3><div class="settings-card"><div class="settings-row"><span>Dados salvos em</span><span class="secondary-value">Neste aparelho</span></div><div class="settings-row"><span>iCloud</span><span class="secondary-value">Apenas se salvo manualmente</span></div></div></section><p class="settings-version-v090">Versão ${esc(release)}</p></main>`);
+}
+const __renderSettingsV090Base=renderSettings;
+renderSettings=renderSettingsV090;
+const __renderV090=render;
+render=function(){
+  const result=__renderV090();
+  const byId=id=>document.getElementById(id);
+  if(byId('openAreasSettings'))byId('openAreasSettings').onclick=()=>{ui.settingsView='areas';render();};
+  if(byId('closeAreasSettings'))byId('closeAreasSettings').onclick=()=>{ui.settingsView='main';render();};
+  document.querySelectorAll('[data-theme-choice]').forEach(button=>button.onclick=async()=>{data.settings.theme=button.dataset.themeChoice;await persistSettings();applyTheme();render();});
+  return result;
+};

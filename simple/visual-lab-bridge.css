@@ -1,0 +1,7 @@
+/* Beta Visual Lab bridge. Rules are inert unless the Beta-only runtime enables it. */
+html[data-visual-lab-active] .tabbar{height:var(--vl-bottomBar-height,var(--tabbar-height,50px));gap:var(--vl-bottomBar-gap,var(--tabbar-gap,6px));opacity:var(--vl-bottomBar-opacity,1)}
+html[data-visual-lab-active] .tabbar .sf-icon{width:var(--vl-bottomBar-iconSize,var(--tab-icon,35px));height:var(--vl-bottomBar-iconSize,var(--tab-icon,35px));transform:translate(var(--vl-bottomBar-offsetX,0px),var(--vl-bottomBar-offsetY,0px))}
+html[data-visual-lab-active] .tabbar button[data-tab="history"] .sf-icon{color:var(--vl-historyIcon-color,currentColor)}
+html[data-visual-lab-active] .timer-card{min-height:var(--vl-timerCard-minHeight,var(--timer-min-height,64px));gap:var(--vl-timerCard-gap,var(--timer-gap,10px));border-radius:var(--vl-timerCard-radius,var(--timer-radius,30px))}
+html[data-visual-lab-glow] .timer-card{box-shadow:var(--vl-timerCard-shadow)}
+html[data-visual-lab-active] .timer-card .name{font-size:var(--vl-timerCard-titleSize,var(--timer-name-size,15px));text-align:var(--vl-timerCard-titleAlign,var(--timer-name-align,left));transform:translate(var(--vl-timerCard-titleOffsetX,0px),var(--vl-timerCard-titleOffsetY,0px))}

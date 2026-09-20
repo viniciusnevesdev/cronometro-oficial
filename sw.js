@@ -87,7 +87,7 @@ function relPath(url){
 }
 function isSpecialNavigation(url){
   const rel=relPath(url);
-  if(!BETA_MODE&&rel.startsWith('beta/'))return true;
+  if(!BETA_MODE&&(rel.startsWith('beta/')||rel.startsWith('simple/')))return true;
   return rel==='menu.html'||rel.startsWith('menu/')||rel.startsWith('versoes/')||rel.startsWith('diagnostico/')||rel==='launch.html'||rel==='recover.html'||rel==='safe.html';
 }
 async function networkFirst(request, fallbackIndex=false){

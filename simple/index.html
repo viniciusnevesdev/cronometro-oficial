@@ -2,15 +2,16 @@
 <html lang="pt-BR" data-visual-style="classic">
 <head>
   <meta charset="utf-8" />
-  <meta name="robots" content="noindex,nofollow" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
   <meta name="theme-color" content="#F2F2F6" media="(prefers-color-scheme: light)" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="Cronômetro Beta" />
+  <meta name="apple-mobile-web-app-title" content="Cronômetro" />
   <link rel="manifest" href="./manifest.webmanifest" />
-  <title>Cronômetro Beta</title>
+  <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="./app-icon-192.png" />
+  <title>Cronômetro Simples</title>
   <link rel="stylesheet" href="./cronometro-v080-01.css" />
   <link rel="stylesheet" href="./cronometro-v080-02.css" />
   <link rel="stylesheet" href="./cronometro-v080-03.css" />
@@ -147,17 +148,13 @@
   </style>
   <link rel="stylesheet" href="./presentation.css" />
   <link rel="stylesheet" href="./analytics.css" />
-  <link rel="stylesheet" href="./visual-lab-bridge.css?v=0.8.9-beta.22">
-
-  <link rel="icon" type="image/png" sizes="192x192" href="./app-icon-beta-192.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon-beta.png">
 </head>
 <body>
   <div id="app"><div class="boot-message">Abrindo Cronômetro…</div></div>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   
   <!-- cronometro-public-runtime -->
-  <script>window.APP_RELEASE="0.8.9-beta.22";window.__CRONOMETRO_DISABLE_SW__=true;setTimeout(()=>{const t=(p,m)=>Promise.race([p,new Promise(r=>setTimeout(()=>r(null),m))]);(async()=>{try{const base=new URL('./',location.href).pathname;if('serviceWorker'in navigator){const regs=await t(navigator.serviceWorker.getRegistrations(),500);if(Array.isArray(regs))Promise.allSettled(regs.filter(x=>{try{return new URL(x.scope).pathname===base}catch(_){return false}}).map(x=>x.unregister()));}if('caches'in window){const keys=await t(caches.keys(),500);if(Array.isArray(keys))Promise.allSettled(keys.filter(k=>k.startsWith('cronometro-beta-')).map(k=>caches.delete(k)));}}catch(_){}})();},0);</script>
+  <script>window.APP_RELEASE="0.8.9-simple.1";</script>
   <script src="./boot-resilient.js"></script>
   <!-- /cronometro-public-runtime -->
   <script src="./cronometro-v080-01.js"></script>
@@ -235,8 +232,6 @@
   </script>
   <script src="./presentation-ui.js"></script>
   <script src="./analytics-ui.js"></script>
-  <script src="./beta-tools.js?v=0.8.9-beta.22" defer></script>
-  <script src="./beta-patches.js?v=0.8.9-beta.22" defer></script>
-  <script src="./visual-lab.js?v=0.8.9-beta.22" defer></script>
+  <script src="./simple-mode.js"></script>
 </body>
 </html>

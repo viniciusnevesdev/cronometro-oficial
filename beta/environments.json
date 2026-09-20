@@ -1,0 +1,20 @@
+{
+  "official": {
+    "release": "0.8.9",
+    "branch": "stable",
+    "database": "cronometro_local_v1"
+  },
+  "beta": {
+    "release": "0.8.9-beta.22",
+    "branch": "development",
+    "database": "cronometro_beta_v1"
+  },
+  "simple": {
+    "release": "0.8.9-simple.1",
+    "database": "cronometro_simple_v1"
+  },
+  "uze": {
+    "stableUrl": "https://viniciusnevesdev.github.io/cronometro-app/",
+    "betaUrl": "https://viniciusnevesdev.github.io/cronometro-app/beta/"
+  }
+}
