@@ -41,7 +41,7 @@ Não há sincronização automática com iCloud ou entre aparelhos. O JSON agora
 
 - `index.html` — shell da PWA
 - `styles.css` — interface/temas
-- `app.js` — banco, cronômetro, modelos, histórico, estatísticas, exportação/importação
+- `cronometro-v080-*.js` e camadas posteriores — motor modular, dados, interface e recursos atuais
 - `manifest.webmanifest` — instalação PWA
 - `sw.js` — cache offline
 - `icon.svg` — ícone
