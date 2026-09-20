@@ -1,56 +1,122 @@
-# Cronômetro — PWA local para iPhone
+# Cronômetro
 
-PWA pessoal em **HTML + CSS + JavaScript puro**, hospedável no GitHub Pages, sem backend, assinatura ou serviço pago. Banco principal: **IndexedDB `cronometro_local_v1`**. Cache offline: Service Worker.
+PWA local em HTML, CSS e JavaScript puro. Não há backend: os modelos,
+registros, notas e ajustes ficam no IndexedDB do navegador. O banco do
+aplicativo Oficial é `cronometro_local_v1`.
 
-## Versão 0.2.0
+## Branches e ambientes
 
-- Um cronômetro por vez.
-- Tocar no ativo para parar; tocar novamente para continuar; tocar em outro para trocar imediatamente.
-- Períodos sem cronômetro após o primeiro início são registrados como **Pausas**.
-- **Tempo total** = soma dos cronômetros e fica parado durante pausas.
-- Título padrão: `(sem título) DD/MM/AAAA • HH:mm`; renomear tocando no título.
-- Menu do título: Renomear, Editar modelo, Zerar e descartar.
-- Botão esquerdo da tela Cronômetros abre a página **Modelos**; há criação, reordenação e menu por modelo (Renomear, Editar, Duplicar, Apagar).
-- Botão `•••` abre bottom sheet **Detalhes** com campo de Notas.
-- Card de Tempo total com ícone de relógio.
-- Sem botão global Pausar.
-- Ajustes em estilo inset grouped iOS; tema Sistema/Claro/Escuro; cor de destaque configurável.
-- Tema claro base: `#F2F2F6`; cartões `#FFFFFF`; tema escuro usa equivalentes iOS.
-- Exportação CSV/PDF/JSON.
-- **Restauração por JSON**: substitui os dados locais pelos dados do arquivo após confirmação.
-- Service Worker atualizado para cache `cronometro-v2` e limpeza de caches antigos.
+- `development` é a fonte de Desenvolvimento/Testes. É a branch normal para
+  mudanças.
+- `main` contém o pacote Oficial/Estável que o GitHub Pages publica. Não é
+  uma branch de desenvolvimento.
+- `stable` é o snapshot usado pelo pipeline para montar o pacote Oficial.
 
-## Dados e atualização
+O pacote Beta gerado a partir de `development` usa o banco separado
+`cronometro_beta_v1`. As ferramentas da Beta permitem somente a cópia
+Oficial → Beta; elas não escrevem no banco Oficial.
 
-O GitHub Pages hospeda os **arquivos do app**. Modelos, registros, tempos e notas permanecem no IndexedDB do aparelho. Substituir os arquivos no mesmo repositório e fazer um novo commit **não deve apagar o banco local**.
+O pipeline lê as releases de publicação em `environments.json`:
 
-Antes de mudanças que alterem dados/estrutura, exporte o JSON completo. Nunca corrija bugs resetando `cronometro_local_v1`.
+- `official.release` para o pacote Oficial;
+- `beta.release` para o pacote Beta;
+- `simple.release` para a variante simples.
 
-## Instalar no iPhone
+`version.json` na raiz e o `window.APP_RELEASE` inline de `index.html`
+acompanham a release da fonte Beta e devem ser atualizados juntos. Nos
+pacotes gerados, cada `version.json`, o valor de `window.APP_RELEASE`, o
+badge e os metadados de interface são escritos pelo pipeline a partir de
+`environments.json`. Os arquivos `cronometro-v081-version.js` e
+`cronometro-v083-version.js` preservam fallbacks para executar snapshots
+históricos; não são uma fonte independente de release.
 
-1. Publique estes arquivos no mesmo repositório GitHub Pages.
-2. Abra a URL HTTPS no Safari.
-3. Compartilhar → **Adicionar à Tela de Início** → Abrir como App da Web.
-4. Depois do cache inicial, as funções principais são locais/offline.
+## Estrutura da fonte
 
-## Limitação
+O motor é modular e a ordem de carregamento em `index.html` faz parte da
+arquitetura:
 
-Não há sincronização automática com iCloud ou entre aparelhos. O JSON agora pode ser usado para restaurar um backup manualmente.
+- `cronometro-v080-*.js` e `cronometro-v080-*.css`: núcleo, dados e interface
+  inicial;
+- `cronometro-v081-*`, `v082-*` e `v083-*`: camadas de modelos, áreas,
+  clientes, histórico e estatísticas;
+- `cronometro-v084-bottom-bar-lab.*`: editor da barra inferior;
+- `cronometro-v085-sound-settings.js`: ajustes de som;
+- `cronometro-v086-stats-icon.js`: ícone de estatísticas;
+- `cronometro-v087-data-backup.*`: interface de backup;
+- `cronometro-v088-ultra-visual.*`: modos Clássico e Ultra;
+- `cronometro-v090-settings.*`: organização atual dos ajustes.
 
-## Arquivos
+Arquivos auxiliares relevantes:
 
-- `index.html` — shell da PWA
-- `styles.css` — interface/temas
-- `cronometro-v080-*.js` e camadas posteriores — motor modular, dados, interface e recursos atuais
-- `manifest.webmanifest` — instalação PWA
-- `sw.js` — cache offline
-- `icon.svg` — ícone
-- `AI_RULES_MIN.txt` — regras para futuras edições por IA
+- `boot-resilient.js`: inicialização com fallback para diagnóstico/modo
+  seguro, sem alterar IndexedDB;
+- `beta-tools.js`: ferramentas exclusivas da Beta;
+- `visual-lab.js` e `visual-lab-bridge.css`: Laboratório Visual exclusivo do
+  pacote Beta;
+- `launch.html`, `recover.html` e `safe.html`: páginas independentes de
+  suporte;
+- `sw.js`, `manifest.webmanifest` e `app-icon-192.png`: metadados e assets da
+  fonte PWA.
 
+`styles.css` permanece no repositório, mas não é carregado pelo `index.html`
+atual; a interface da fonte usa as folhas modulares listadas acima.
 
-## Developer Edition v0.4
-Painel reorganizado por componentes, com prévia ao vivo, controles +/- e Snapshots visuais.
+## Fonte versus pacote público
 
+A raiz de `development` também pode ser aberta diretamente: o
+`app-icon-192.png` da fonte é usado tanto como favicon quanto como Apple Touch
+Icon. `prepare_environments.py` gera, para os pacotes públicos, os assets
+derivados do ícone aprovado:
 
-## v0.5.0-dev.0
-Modo desenvolvedor unificado e escondido em Ajustes; Snapshots versionados com resumo de alterações; seleção temporária de componentes na tela; exportação de distribuição/limpa/nova base Developer; ajuda contextual nos ajustes menos óbvios.
+- `app-icon-512.png`;
+- `apple-touch-icon.png`;
+- equivalentes Beta (`app-icon-beta-512.png` e
+  `apple-touch-icon-beta.png`).
+
+Por isso, os tamanhos 512 px e 180 px não são duplicados na árvore-fonte.
+Durante a montagem, o pipeline substitui o Apple Touch Icon da fonte pelo
+arquivo de 180 px, reescreve o manifest com os ícones de 192/512 px e gera
+service workers com a lista real de assets de cada pacote.
+
+O `sw.js` da fonte é uma configuração de desenvolvimento autocontida. O nome
+do seu cache ainda acompanha a release Beta manualmente e deve ser mantido em
+sincronia com a fonte. O service worker dos pacotes Oficial, Beta e Simples é
+gerado por `prepare_environments.py`, com cache versionado pela release do
+pipeline e todos os arquivos finais no pré-cache.
+
+## Build e publicação
+
+O workflow [pages.yml](.github/workflows/pages.yml), disparado por push em
+`development`, executa a sequência abaixo:
+
+1. lê as releases de `environments.json`;
+2. gera o ícone Beta;
+3. usa `prepare_release.py` para montar os snapshots Oficial e Beta;
+4. usa `prepare_environments.py` para montar `site/`, seus ambientes,
+   páginas de suporte, manifests, caches e assets derivados;
+5. finaliza metadados e histórico de versões;
+6. valida o pacote antes de gravar o conteúdo publicado em `main`.
+
+Executar esse workflow, publicar ou alterar `main` exige autorização
+explícita. Não use `site/` como fonte de edição.
+
+`prepare_release.py` baixa camadas de apresentação/estatísticas da
+demonstração pública durante o build. Portanto, uma montagem completa requer
+acesso de rede e Pillow, como configurado pelo workflow; não há um comando de
+build local totalmente offline confirmado neste repositório.
+
+## Verificações locais seguras
+
+Sem montar ou publicar pacote, é possível validar a fonte com:
+
+```bash
+for file in *.js; do node --check "$file"; done
+git diff --check
+```
+
+Não há suíte de testes automatizados versionada no `cronometro-oficial` neste
+momento. Os testes do projeto de referência não fazem parte deste repositório
+nem devem ser usados como substituto de testes do aplicativo Oficial.
+
+Antes de uma alteração que afete formato de dados, exporte um backup JSON.
+Nunca corrija problemas removendo `cronometro_local_v1`.

@@ -1,7 +1,9 @@
 'use strict';
-const CACHE='cronometro-0.8.9-beta.3';
+/* Cache da fonte de development. Os pacotes públicos recebem nomes canônicos
+   versionados em prepare_environments.py. */
+const CACHE='cronometro-development-0.8.9-beta.22';
 const ASSETS=[
-  './','./index.html','./manifest.webmanifest','./icon.svg','./app-icon-192.png','./app-icon-512.png','./apple-touch-icon.png','./initial-data.json',
+  './','./index.html','./manifest.webmanifest','./icon.svg','./app-icon-192.png','./initial-data.json',
   './cronometro-v080-01.css','./cronometro-v080-02.css','./cronometro-v080-03.css',
   './cronometro-v080-01.js','./cronometro-v080-02.js','./cronometro-v080-03.js',
   './cronometro-v080-04.js','./cronometro-v080-05.js','./cronometro-v080-06.js',
@@ -14,7 +16,8 @@ const ASSETS=[
   './cronometro-v084-bottom-bar-lab.css','./cronometro-v084-bottom-bar-lab.js',
   './cronometro-v085-sound-settings.js','./cronometro-v086-stats-icon.js',
   './cronometro-v087-data-backup.css','./cronometro-v087-data-backup.js',
-  './cronometro-v088-ultra-visual.css','./cronometro-v088-ultra-visual.js'
+  './cronometro-v088-ultra-visual.css','./cronometro-v088-ultra-visual.js',
+  './cronometro-v090-settings.css','./cronometro-v090-settings.js'
 ];
 
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting()))});
