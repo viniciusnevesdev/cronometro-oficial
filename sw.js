@@ -19,6 +19,7 @@ const ASSETS=[
   './cronometro-v088-ultra-visual.css','./cronometro-v088-ultra-visual.js',
   './cronometro-v090-settings.css','./cronometro-v090-settings.js',
   './cronometro-v091-client-directory.css','./cronometro-v091-client-directory.js'
+  ,'./cronometro-v092-advanced-analytics.css','./cronometro-v092-advanced-analytics.js'
 ];
 
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting()))});

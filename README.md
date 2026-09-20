@@ -47,6 +47,8 @@ arquitetura:
 - `cronometro-v090-settings.*`: organização atual dos ajustes.
 - `cronometro-v091-client-directory.*`: diretório de clientes por área de
   atendimentos, sem alterar áreas genéricas.
+- `cronometro-v092-advanced-analytics.*`: filtros e métricas avançadas em
+  modo somente leitura, com fallback para o painel anterior.
 
 Arquivos auxiliares relevantes:
 
@@ -121,6 +123,7 @@ rede:
 
 ```bash
 node tools/test_data_safety_net.js
+node tools/test_advanced_analytics.js
 ```
 
 Eles usam somente fixtures sintéticas e uma store em memória para cobrir o
