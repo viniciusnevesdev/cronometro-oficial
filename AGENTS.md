@@ -58,7 +58,7 @@ Ao concluir qualquer tarefa substancial de análise, implementação, correção
    - SHA de eventual commit;
    - conclusão e recomendação para o próximo passo.
 3. Publique o relatório executando:
-   `tools/publish_codex_report.sh /tmp/codex-report.md <slug-curto>`
+   `bash tools/publish_codex_report.sh /tmp/codex-report.md <slug-curto>`
 4. O script publica somente `.codex-reports/latest.md` e uma cópia histórica na branch `codex-reports`.
 5. O push para `codex-reports` está previamente autorizado apenas para relatórios.
 6. Não envie alterações funcionais do aplicativo para `codex-reports`.
