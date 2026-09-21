@@ -64,18 +64,26 @@ html = f'''<!doctype html>
 <main>
   <header>
     <div class="headrow"><span class="headicon"><img src="../icon.svg" alt=""></span><h1>Cronômetro</h1></div>
-    <p class="lead">Menu de acesso à versão Oficial, Beta e ferramentas de diagnóstico e recuperação.</p>
+    <p class="lead">Menu de acesso às quatro versões do Cronômetro e às ferramentas de diagnóstico e recuperação.</p>
   </header>
 
-  <div class="section-title">Apps</div>
+  <div class="section-title">Quatro versões</div>
   <div class="grid">
     <a class="card app-card" href="../">
       <span class="icon"><img src="../icon.svg" alt=""></span>
-      <span class="copy"><strong>Oficial <span class="tag stable">USO DIÁRIO</span></strong><small>Versão estável · v{STABLE_RELEASE}<br>Seus registros reais.</small></span>
+      <span class="copy"><strong>Pessoal Oficial <span class="tag stable">ESTÁVEL</span></strong><small>Uso diário · v{STABLE_RELEASE}<br>Dados reais.</small></span>
     </a>
     <a class="card app-card" href="../beta/">
       <span class="icon"><img src="../beta/app-icon-beta-192.png" alt=""></span>
-      <span class="copy"><strong>Beta <span class="tag beta">TESTES</span></strong><small>Atualizações · v{BETA_LABEL}<br>Dados isolados.</small></span>
+      <span class="copy"><strong>Pessoal Beta <span class="tag beta">BETA</span></strong><small>Testes pessoais · v{BETA_LABEL}<br>Dados isolados.</small></span>
+    </a>
+    <a class="card app-card" href="https://viniciusnevesdev.github.io/cronometro-app/">
+      <span class="icon"><img src="../icon.svg" alt=""></span>
+      <span class="copy"><strong>Apresentação Oficial <span class="tag stable">ESTÁVEL</span></strong><small>Versão simplificada para apresentar.</small></span>
+    </a>
+    <a class="card app-card" href="https://viniciusnevesdev.github.io/cronometro-app/beta/">
+      <span class="icon"><img src="../beta/app-icon-beta-192.png" alt=""></span>
+      <span class="copy"><strong>Apresentação Beta <span class="tag beta">BETA</span></strong><small>Visual e funções em teste · dados fictícios.</small></span>
     </a>
   </div>
 
