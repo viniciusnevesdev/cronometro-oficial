@@ -1,7 +1,7 @@
 /* Visual Lab v1 — runtime exclusive to the Beta package. It never writes app settings. */
 (()=>{'use strict';
 const KEY='cronometro-beta-visual-lab-v1', VERSION=1, root=document.documentElement;
-const defaults={bottomBar:{height:50,iconSize:35,gap:6,opacity:1,offsetX:0,offsetY:0},timerCard:{minHeight:64,gap:10,radius:30,titleSize:15,titleAlign:'left',titleOffsetX:0,titleOffsetY:0,glow:0,shadowBlur:30},historyIcon:{color:'theme',svg:''}};
+const defaults={bottomBar:{height:58,iconSize:30,gap:6,opacity:1,offsetX:0,offsetY:0},timerCard:{minHeight:64,gap:10,radius:30,titleSize:15,titleAlign:'left',titleOffsetX:0,titleOffsetY:0,glow:0,shadowBlur:30},historyIcon:{color:'theme',svg:''}};
 const clone=x=>JSON.parse(JSON.stringify(x)); const merge=(a,b)=>Object.keys(a).reduce((o,k)=>(o[k]=a[k]&&typeof a[k]==='object'&&!Array.isArray(a[k])?merge(a[k],b?.[k]||{}):(b&&b[k]!==undefined?b[k]:a[k]),o),{});
 let config=load(), past=[], future=[];
 function load(){try{const x=JSON.parse(localStorage.getItem(KEY)||'null');return x&&x.schemaVersion===VERSION&&x.overrides&&typeof x.overrides==='object'?merge(defaults,x.overrides):clone(defaults)}catch(_){return clone(defaults)}}
