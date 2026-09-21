@@ -14,14 +14,16 @@
 }
 .record-detail-head .record-detail-close,
 .record-detail-check{
-  width:40px;height:40px;min-width:40px;min-height:40px;
+  width:44px;height:44px;min-width:44px;min-height:44px;
   border-radius:50%;padding:0;display:grid;place-items:center;
 }
 .record-detail-head .record-detail-close .sf-icon,
-.record-detail-check .sf-icon{width:18px;height:18px;margin:auto}
+.record-detail-check .sf-icon{width:21px;height:21px;margin:auto}
 .record-detail-title-stack{min-width:0;display:grid;justify-items:center;gap:1px}
-.record-title-button{max-width:100%;min-height:25px;padding:0 4px}
-.record-title-button span{font-size:17px;line-height:21px}
+.record-detail-title-stack .record-title-button{grid-column:auto;grid-row:auto}
+.record-detail-title-stack .record-date-button{grid-column:auto;grid-row:auto}
+.record-title-button{max-width:100%;min-height:34px;padding:0 4px;white-space:normal}
+.record-title-button span{font-size:17px;line-height:19px;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;white-space:normal}
 .record-date-button{
   border:0;background:transparent;color:var(--secondary);padding:1px 6px 2px;
   font-size:11.5px;line-height:15px;display:flex;align-items:center;gap:4px;
@@ -52,6 +54,11 @@
 .record-summary .row{min-height:30px;padding:3px 0}
 .record-summary .row>span:first-child{font-size:12.5px;color:var(--secondary)}
 .record-summary .row>strong{font-size:14px}
+.record-summary .row:has(.detail-time-with-icon){min-height:42px;margin-top:5px;padding:6px 9px;border:0;border-radius:13px;background:color-mix(in srgb,var(--running) 11%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--running) 22%,transparent)}
+.record-summary .row:has(.detail-time-with-icon)>span:first-child,.record-summary .detail-time-with-icon,.record-summary .detail-time-with-icon .sf-icon{color:var(--running)}
+.record-summary .detail-time-with-icon{font-size:16px;font-weight:800}
+
+@media(max-width:420px){.record-title-button span{font-size:15px;line-height:17px}}
 
 /* cronômetros salvos: todos aparecem; os zerados ficam discretos */
 .record-timer-card.zero{opacity:.52;border-left-color:color-mix(in srgb,var(--accent) 34%,transparent)}

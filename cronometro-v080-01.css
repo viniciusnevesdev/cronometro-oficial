@@ -196,8 +196,10 @@ button:disabled{opacity:.28;cursor:default}
 .timer-card.active .icon{color:var(--running);background:transparent}
 .timer-card.paused{background:var(--card);opacity:1}
 .timer-card.paused .time,.timer-card.paused .name,.timer-card.paused .icon{color:var(--used-text)}
-.timer-state-icon.spin .sf-icon,.timer-state-icon.spin .custom-active-icon{animation:timer-disc-spin var(--active-disc-duration,1400ms) linear infinite;transform-origin:50% 50%;will-change:transform}
-@keyframes timer-disc-spin{to{transform:rotate(360deg)}}
+.timer-state-icon.spin{animation:timer-disc-spin var(--active-disc-duration,1400ms) linear infinite;-webkit-transform-origin:50% 50%;transform-origin:50% 50%;will-change:transform}
+.timer-state-icon.spin .sf-icon,.timer-state-icon.spin .custom-active-icon{animation:none;-webkit-transform:none;transform:none}
+@-webkit-keyframes timer-disc-spin{to{-webkit-transform:rotate(360deg);transform:rotate(360deg)}}
+@keyframes timer-disc-spin{to{-webkit-transform:rotate(360deg);transform:rotate(360deg)}}
 .badge{display:inline-block;font-size:11px;line-height:16px;padding:1px 7px;border-radius:999px;background:color-mix(in srgb,var(--secondary) 12%,transparent);color:var(--secondary);margin:3px 0 0 6px;vertical-align:middle}
 .add-card{--plus-stroke:var(--add-icon-stroke,2.5);border:0;background:transparent;color:var(--accent);min-height:var(--add-height,52px);border-radius:18px;width:100%;font-size:var(--add-text-size,14.5px);font-weight:var(--add-text-weight,620);display:flex;justify-content:center;align-items:center;gap:5px}
 .add-card .sf-icon{width:18px;height:18px;stroke-width:var(--add-icon-stroke,2.5)}
@@ -262,6 +264,15 @@ button:disabled{opacity:.28;cursor:default}
 .tabbar button:active{transform:scale(.98)}
 .tabbar .tab-label{display:none}
 .tabbar .sf-icon{margin:auto}
+
+/* O padrão mantém os destinos legíveis; laboratórios continuam donos dos seus parâmetros. */
+:root:not(.bottom-bar-lab-enabled):not([data-visual-lab-active]) .tabbar{height:max(var(--tabbar-height,50px),58px)}
+:root:not(.bottom-bar-lab-enabled) .tabbar button{grid-template-rows:32px 13px;align-content:center;gap:1px;padding-top:2px;padding-bottom:2px}
+:root:not(.bottom-bar-lab-enabled):not([data-visual-lab-active]) .tabbar .sf-icon{width:min(var(--tab-icon,35px),30px);height:min(var(--tab-icon,35px),30px)}
+:root:not(.bottom-bar-lab-enabled) .tabbar .tab-label{display:block;font-size:9.5px;line-height:11px;font-weight:560;text-align:center}
+:root:not(.bottom-bar-lab-enabled) .tabbar button.active .tab-label{font-weight:720}
+
+@media(prefers-reduced-motion:reduce){.timer-state-icon.spin{animation:none!important}.tabbar button,.timer-card{transition-duration:.01ms!important}}
 
 /* Componentes genéricos */
 .section-title{font-size:28px;margin:8px 0 18px}

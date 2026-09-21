@@ -70,8 +70,9 @@
     const kpi=(label,value)=>`<div><small>${label}</small><strong>${value}</strong></div>`;
     const stepLabel=entry=>entry.change==null?'Sem base anterior':`${entry.change>=0?'+':''}${entry.change.toFixed(1).replace('.',',')}%`;
     const customers=`<div class="analytics-v092-customer"><span>Novos com data real <strong>${result.customer.new==null?'—':result.customer.new}</strong></span><span>Recorrentes <strong>${result.customer.recurring==null?'—':result.customer.recurring}</strong></span><span>Data desconhecida <strong>${result.customer.unknownDate}</strong></span><span>Sem cliente <strong>${result.customer.withoutClient}</strong></span></div>`;
+    const trendTone=result.comparison.kind==='faster'?'positive':result.comparison.kind==='slower'?'negative':'neutral';
     const body=[
-      `<section class="analytics-v092-hero"><small>${esc(range)}</small><strong>${esc(comparison)}</strong></section>`,
+      `<section class="analytics-v092-hero trend-${trendTone}"><small>${esc(range)}</small><strong>${esc(comparison)}</strong></section>`,
       `<section class="analytics-v092-kpis">${kpi('Atendimentos',result.current.length)}${kpi('Tempo total',fmtDuration(result.work))}${kpi('Média',fmtDuration(result.average))}${kpi('Mediana',fmtDuration(result.typical))}${kpi('Consistência',result.consistency==null?'—':`${result.consistency.toFixed(0)}%`)}${kpi('Pausas',result.pausePercent==null?'—':`${result.pausePercent.toFixed(1).replace('.',',')}%`)}</section>`,
       card('Curva temporal',curveMarkup(result.curve),'média por dia'),card('Distribuição por modelo',barRows(result.models),'tempo total'),
       filters.areaId==='all'?card('Distribuição por área',barRows(result.areas),'tempo total'):'',card('Gargalos por etapa',barRows(result.bottlenecks,entry=>fmtDuration(entry.average)),'maior tempo médio por etapa'),
