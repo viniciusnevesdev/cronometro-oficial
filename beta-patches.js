@@ -112,3 +112,98 @@
   const observer=new MutationObserver(() => decorateStandardTimerTitles(app));
   observer.observe(app,{childList:true,subtree:true});
 })();
+
+
+/* smartbeta-settings-layer
+   A Beta inteligente usa o acabamento visual da UZE sem substituir a aba Estatísticas.
+   Também colapsa Áreas em um único contexto de atendimentos somente neste ambiente Beta. */
+(() => {
+  'use strict';
+  const normalizeText=value=>String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+  const lineIcon=paths=>`<svg class="sf-icon smartbeta-line-icon" viewBox="0 0 24 24" aria-hidden="true">${paths}</svg>`;
+  const icons={
+    note:lineIcon('<path d="M9 18V5l10-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="16" cy="16" r="3"/>'),
+    appearance:lineIcon('<path d="M4 7h10"/><path d="M18 7h2"/><circle cx="16" cy="7" r="2"/><path d="M4 17h2"/><path d="M10 17h10"/><circle cx="8" cy="17" r="2"/>'),
+    optimized:lineIcon('<path d="M5 12h14"/><path d="M12 5v14"/><circle cx="12" cy="12" r="8"/>'),
+    ultra:lineIcon('<path d="m12 3 1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8Z"/>')
+  };
+  const themeIcon=mode=>mode==='light'
+    ?'<svg class="smartbeta-theme-icon" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="6.5" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>'
+    :mode==='dark'
+      ?'<svg class="smartbeta-theme-icon" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="6.5" fill="currentColor"/></svg>'
+      :'<svg class="smartbeta-theme-icon" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="6.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10 3.5a6.5 6.5 0 0 0 0 13Z" fill="currentColor"/></svg>';
+
+  async function normalizeSinglePresentationArea(){
+    if(typeof data==='undefined'||!data?.settings||typeof put!=='function')return false;
+    let settingsChanged=false,currentChanged=false;
+    const area={id:'principal',name:'Atendimentos',type:'clients'};
+    const areas=Array.isArray(data.settings.areas)?data.settings.areas:[];
+    if(areas.length!==1||areas[0]?.id!=='principal'||areas[0]?.type!=='clients'){data.settings.areas=[area];settingsChanged=true;}
+    if(data.settings.activeAreaId!=='principal'){data.settings.activeAreaId='principal';settingsChanged=true;}
+    if(!Array.isArray(data.settings.clients))data.settings.clients=[];
+    for(const client of data.settings.clients){if(client&&client.areaId!=='principal'){client.areaId='principal';settingsChanged=true;}}
+    for(const model of data.models||[]){if(model&&model.areaId!=='principal'){model.areaId='principal';await put('models',model);}}
+    for(const session of data.sessions||[]){if(session&&session.areaId!=='principal'){session.areaId='principal';await put('sessions',session);}}
+    if(data.current&&data.current.areaId!=='principal'){data.current.areaId='principal';currentChanged=true;}
+    if(settingsChanged)await persistSettings();
+    if(currentChanged)await persistCurrent();
+    return settingsChanged||currentChanged;
+  }
+
+  const style=document.createElement('style');
+  style.id='smartbeta-settings-style';
+  style.textContent=`
+    .smartbeta-heading{margin:0 4px 7px;color:var(--text);font-size:15px;line-height:20px;font-weight:760}
+    .smartbeta-mode{margin-bottom:13px}
+    .smartbeta-segment{--segment-count:3;position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));padding:3px;border:1px solid var(--line);border-radius:999px;background:var(--card);overflow:hidden;isolation:isolate}
+    .smartbeta-segment[data-options="2"]{--segment-count:2;grid-template-columns:repeat(2,minmax(0,1fr))}
+    .smartbeta-segment::before{content:"";position:absolute;z-index:0;top:3px;bottom:3px;left:3px;width:calc((100% - 6px)/var(--segment-count));border-radius:999px;background:color-mix(in srgb,var(--accent) 12%,var(--bg));box-shadow:0 1px 4px rgba(0,0,0,.11);transition:transform .24s cubic-bezier(.22,.8,.24,1)}
+    .smartbeta-segment[data-selected="system"]::before,.smartbeta-segment[data-selected="ultra"]::before{transform:translateX(100%)}
+    .smartbeta-segment[data-selected="dark"]::before{transform:translateX(200%)}
+    .smartbeta-segment button{position:relative;z-index:1;min-width:0;min-height:38px;border:0;border-radius:999px;background:transparent;color:var(--secondary);display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:0 8px;font-size:13px;font-weight:680;white-space:nowrap}
+    .smartbeta-segment button.selected{color:var(--accent)}
+    .smartbeta-theme-icon,.smartbeta-segment .smartbeta-line-icon{width:18px;height:18px;flex:0 0 18px}
+    .smartbeta-line-icon{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+    .smartbeta-navigation .settings-row{min-width:0}
+    .smartbeta-navigation-row{display:grid!important;grid-template-columns:minmax(0,1fr) 18px!important;gap:9px!important;align-items:center!important;width:100%!important}
+    .smartbeta-icon-label{display:inline-flex;align-items:center;gap:9px;min-width:0;text-align:left}
+    .smartbeta-icon-label>.sf-icon{width:19px;height:19px;flex:0 0 auto}
+    .smartbeta-icon-label>span{min-width:0}.smartbeta-icon-label strong,.smartbeta-icon-label small{display:block}
+    .smartbeta-icon-label small{color:var(--secondary);font-size:11px;font-weight:400;line-height:14px;margin-top:2px;white-space:normal}
+    .smartbeta-chevron{color:var(--secondary);font-size:24px;line-height:1;justify-self:end}
+    @media(max-width:390px){.smartbeta-segment button{font-size:12px;gap:5px;padding:0 5px}.smartbeta-theme-icon,.smartbeta-segment .smartbeta-line-icon{width:17px;height:17px;flex-basis:17px}}
+  `;
+  document.head.appendChild(style);
+
+  const baseSettings=renderSettings;
+  renderSettings=function(){
+    const view=ui.settingsView||'main';
+    if(view!=='main')return baseSettings();
+    const theme=data.settings.theme||'system',visual=visualStyleModeV088(),release=String(window.APP_RELEASE||APP_META?.version||'');
+    const themes=[['light','Claro'],['system','Automático'],['dark','Escuro']];
+    const visuals=[['classic','Otimizado',icons.optimized],['ultra','Ultra',icons.ultra]];
+    const clientIcon=typeof personIconMarkup==='function'?personIconMarkup():lineIcon('<circle cx="12" cy="8" r="4"/><path d="M4 21c1-5 4-7 8-7s7 2 8 7"/>');
+    return shell(`<header class="topbar section-tab-header"><h1>Ajustes</h1></header><main class="settings-content settings-v090">
+      <section class="settings-section smartbeta-mode"><h2 class="smartbeta-heading">Tema</h2><div class="smartbeta-segment" data-selected="${esc(theme)}" data-options="3">${themes.map(([id,label])=>`<button data-theme-choice="${id}" class="${theme===id?'selected':''}">${themeIcon(id)}<span>${label}</span></button>`).join('')}</div></section>
+      <section class="settings-section smartbeta-mode"><h2 class="smartbeta-heading">Estilo visual</h2><div class="smartbeta-segment" data-selected="${esc(visual)}" data-options="2">${visuals.map(([id,label,icon])=>`<button data-visual-style-mode="${id}" class="${visual===id?'selected':''}">${icon}<span>${label}</span></button>`).join('')}</div></section>
+      <section class="settings-section"><div class="settings-card settings-navigation-card smartbeta-navigation">
+        <button class="settings-row button-row smartbeta-navigation-row" id="openClientsDirectory"><span class="smartbeta-icon-label">${clientIcon}<span><strong>Clientes</strong><small>Cadastrar e gerenciar clientes</small></span></span><span class="smartbeta-chevron">›</span></button>
+        <button class="settings-row button-row smartbeta-navigation-row" id="openSoundSettings"><span class="smartbeta-icon-label">${icons.note}<span><strong>Som do cronômetro</strong><small>${data.settings.timerSoundEnabled?'Ativado':'Desativado'}</small></span></span><span class="smartbeta-chevron">›</span></button>
+        <button class="settings-row button-row smartbeta-navigation-row" id="openAppearanceSettings"><span class="smartbeta-icon-label">${icons.appearance}<span><strong>Aparência</strong><small>Visual, ícones e detalhes</small></span></span><span class="smartbeta-chevron">›</span></button>
+      </div></section>
+      ${typeof renderDataBackupSectionV087==='function'?renderDataBackupSectionV087():''}
+      <p class="settings-version-v090">Versão ${esc(release)}</p>
+    </main>`,'settings');
+  };
+  if(typeof visualStyleSettingsBlockV088==='function')visualStyleSettingsBlockV088=()=> '';
+
+  async function ready(attempt=0){
+    if(typeof data!=='undefined'&&data?.settings&&Array.isArray(data.models)&&Array.isArray(data.sessions)){
+      const changed=await normalizeSinglePresentationArea();
+      if(changed&&typeof render==='function')render();
+      return;
+    }
+    if(attempt<120)setTimeout(()=>ready(attempt+1),50);
+  }
+  ready();
+})();
