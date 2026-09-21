@@ -6,8 +6,6 @@ const ASSETS=[
   "./AI_RULES_MIN.txt",
   "./DEVELOPMENT.txt",
   "./THIRD_PARTY_NOTICES.txt",
-  "./analytics-ui.js",
-  "./analytics.css",
   "./app-icon-192.png",
   "./app-icon-beta-192.png",
   "./app-icon-beta-512.png",
@@ -64,8 +62,6 @@ const ASSETS=[
   "./jszip.min.js",
   "./launch.html",
   "./manifest.webmanifest",
-  "./presentation-ui.js",
-  "./presentation.css",
   "./primer-capa-base.svg",
   "./recover.html",
   "./safe.html",
@@ -122,15 +118,11 @@ self.addEventListener('fetch',event=>{
   const url=new URL(event.request.url);
   if(url.origin!==self.location.origin)return;
   const rel=relPath(url);
-
-  /* O SW Oficial nunca interfere em /beta/. */
   if(!BETA_MODE&&rel.startsWith('beta/')){
     event.respondWith(fetch(event.request));
     return;
   }
-
   if(event.request.mode==='navigate'){
-    /* Páginas reais nunca recebem index.html como fallback. */
     if(isSpecialNavigation(url)){
       event.respondWith(networkFirst(event.request,false));
       return;
@@ -138,6 +130,5 @@ self.addEventListener('fetch',event=>{
     event.respondWith(networkFirst(event.request,true));
     return;
   }
-
   event.respondWith(networkFirst(event.request,false).catch(()=>caches.match(event.request,{ignoreSearch:true})));
 });
