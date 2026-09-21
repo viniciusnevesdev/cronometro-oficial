@@ -2,7 +2,6 @@ from pathlib import Path
 import json
 import shutil
 import sys
-import urllib.request
 
 ROOT = Path(__file__).resolve().parent
 SOURCE = Path(sys.argv[1] if len(sys.argv) > 1 else ROOT).resolve()
@@ -33,28 +32,6 @@ for name in ('launch.html','recover.html','safe.html','boot-resilient.js'):
     if not dst.exists() and (ROOT / name).exists():
         shutil.copy2(ROOT / name, dst)
 
-# Refinamentos aprovados na demonstração pública. Eles são camadas de UI e
-# estatísticas e não substituem o motor particular; assim Oficial e Beta mantêm
-# áreas, bancos e regras próprias, mas recebem a interface refinada da demo.
-DEMO_BASE = 'https://raw.githubusercontent.com/viniciusnevesdev/cronometro-app/main'
-DEMO_LAYERS = ('presentation-ui.js','presentation.css','analytics-ui.js','analytics.css')
-for name in DEMO_LAYERS:
-    try:
-        with urllib.request.urlopen(f'{DEMO_BASE}/{name}', timeout=20) as response:
-            (OUTPUT / name).write_bytes(response.read())
-    except Exception as exc:
-        raise SystemExit(f'Falha ao obter refinamento da demonstração ({name}): {exc}')
-
-index_path = OUTPUT / 'index.html'
-index_text = index_path.read_text(encoding='utf-8')
-css_links = '  <link rel="stylesheet" href="./presentation.css" />\n  <link rel="stylesheet" href="./analytics.css" />\n'
-js_links = '  <script src="./presentation-ui.js"></script>\n  <script src="./analytics-ui.js"></script>\n'
-if 'presentation.css' not in index_text:
-    index_text = index_text.replace('</head>', css_links + '</head>')
-if 'presentation-ui.js' not in index_text:
-    index_text = index_text.replace('</body>', js_links + '</body>')
-index_path.write_text(index_text, encoding='utf-8')
-
 # Uma única release é injetada nos pontos que usam o placeholder. Isso evita
 # depender de query string para corrigir versão antiga.
 for path in OUTPUT.iterdir():
@@ -72,8 +49,7 @@ for path in OUTPUT.iterdir():
 
 required = [
     'index.html','manifest.webmanifest','sw.js','version.json','cronometro-v080-01.js',
-    'launch.html','recover.html','safe.html','boot-resilient.js',
-    'presentation-ui.js','presentation.css','analytics-ui.js','analytics.css'
+    'launch.html','recover.html','safe.html','boot-resilient.js'
 ]
 missing = [name for name in required if not (OUTPUT / name).exists()]
 if missing:

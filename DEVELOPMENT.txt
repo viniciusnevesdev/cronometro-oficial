@@ -15,7 +15,8 @@ VERSÕES ATUAIS
 PUBLICAÇÃO — REGRA QUE RESOLVEU O 404
 - O GitHub Pages desta conta serve os arquivos reais presentes na branch main.
 - Não confiar apenas em um artifact/deploy separado do workflow.
-- O workflow acionado por development monta o pacote final e substitui os arquivos públicos da main.
+- O workflow acionado por development monta somente a Beta e substitui exclusivamente beta/ na main.
+- O workflow acionado por stable monta somente a Oficial e preserva beta/ byte a byte.
 - A main final deve conter fisicamente: index.html, beta/, diagnostico/, menu/, menu.html, launch.html, recover.html e safe.html.
 - Essa arquitetura replica a correção já usada no projeto Registro Mental.
 

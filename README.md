@@ -90,24 +90,27 @@ pipeline e todos os arquivos finais no pré-cache.
 
 ## Build e publicação
 
-O workflow [pages.yml](.github/workflows/pages.yml), disparado por push em
-`development`, executa a sequência abaixo:
+O workflow [pages.yml](.github/workflows/pages.yml) publica cada ambiente de
+forma isolada:
 
-1. lê as releases de `environments.json`;
-2. gera o ícone Beta;
-3. usa `prepare_release.py` para montar os snapshots Oficial e Beta;
-4. usa `prepare_environments.py` para montar `site/`, seus ambientes,
-   páginas de suporte, manifests, caches e assets derivados;
-5. finaliza metadados e histórico de versões;
-6. valida o pacote antes de gravar o conteúdo publicado em `main`.
+- push em `development` monta a Beta e sincroniza somente `beta/` em `main`;
+- push/promoção aprovada em `stable` monta a Oficial e preserva `beta/` byte a
+  byte;
+- `main` continua contendo somente o pacote que o GitHub Pages serve.
+
+`prepare_isolated_publication.py` constrói e sincroniza o ambiente autorizado,
+verifica os hashes do ambiente protegido e bloqueia qualquer alteração fora do
+escopo. O workflow também valida o diff preparado antes de gravar `main`.
 
 Executar esse workflow, publicar ou alterar `main` exige autorização
 explícita. Não use `site/` como fonte de edição.
 
-`prepare_release.py` baixa camadas de apresentação/estatísticas da
-demonstração pública durante o build. Portanto, uma montagem completa requer
-acesso de rede e Pillow, como configurado pelo workflow; não há um comando de
-build local totalmente offline confirmado neste repositório.
+`prepare_release.py` monta cada snapshot somente a partir dos arquivos locais
+versionados do respectivo snapshot. Ele não baixa JavaScript ou CSS funcional
+da demonstração pública: o analytics v092 e as camadas de interface carregadas
+por `index.html` são a fonte válida do pacote. A etapa de release é
+reproduzível sem rede; Pillow continua necessário apenas para gerar os ícones
+derivados em `prepare_environments.py`.
 
 ## Verificações locais seguras
 

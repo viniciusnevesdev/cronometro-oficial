@@ -1,8 +1,8 @@
-name: Sincronizar site público do Cronômetro
+name: Sincronizar ambiente público do Cronômetro
 
 on:
   push:
-    branches: ["development"]
+    branches: ["development", "stable"]
   workflow_dispatch:
 
 permissions:
@@ -10,159 +10,126 @@ permissions:
 
 concurrency:
   group: "cronometro-publicacao-main"
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build-and-sync-main:
     runs-on: ubuntu-latest
     steps:
+      - name: Determinar ambiente autorizado pelo branch
+        run: |
+          case "${GITHUB_REF_NAME}" in
+            development) echo "PUBLICATION_TARGET=beta" >> "$GITHUB_ENV" ;;
+            stable) echo "PUBLICATION_TARGET=official" >> "$GITHUB_ENV" ;;
+            *) echo "Branch sem ambiente público autorizado: ${GITHUB_REF_NAME}" >&2; exit 1 ;;
+          esac
+
       - name: Checkout da main que o Pages realmente publica
         uses: actions/checkout@v4
         with:
           ref: main
           fetch-depth: 1
 
-      - name: Checkout do código de desenvolvimento
+      - name: Checkout somente da fonte acionadora
         uses: actions/checkout@v4
         with:
-          ref: development
-          path: _dev
+          ref: ${{ github.ref_name }}
+          path: _source
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Checkout da versão Oficial congelada
-        uses: actions/checkout@v4
-        with:
-          ref: stable
-          path: _stable
-          persist-credentials: false
-
-      - name: Carregar versões canônicas
+      - name: Carregar release do ambiente acionado
         run: |
           python3 - <<'PY' >> "$GITHUB_ENV"
-          import json
-          env=json.load(open('_dev/environments.json', encoding='utf-8'))
-          print('STABLE_RELEASE='+env['official']['release'])
-          print('BETA_LABEL='+env['beta']['release'])
+          import json, os
+          env=json.load(open('_source/environments.json', encoding='utf-8'))
+          target=os.environ['PUBLICATION_TARGET']
+          if target=='beta':
+              print('PUBLICATION_RELEASE='+env['beta']['release'])
+          elif target=='official':
+              print('PUBLICATION_RELEASE='+env['official']['release'])
+          else:
+              raise SystemExit('Ambiente de publicação inválido')
           PY
 
       - name: Preparar ferramentas de ícone
+        run: python3 -m pip install --disable-pip-version-check --quiet pillow
+
+      - name: Montar somente a Beta a partir de development
+        if: env.PUBLICATION_TARGET == 'beta'
         run: |
-          python3 -m pip install --disable-pip-version-check --quiet pillow
-          python3 _dev/prepare_beta_icon.py
+          python3 _source/prepare_beta_icon.py
+          python3 _source/prepare_release.py _source _source/_release_source "${PUBLICATION_RELEASE}"
+          python3 _source/prepare_isolated_publication.py build-beta \
+            --source _source/_release_source \
+            --output _source/_publication_beta \
+            --release "${PUBLICATION_RELEASE}"
 
-      - name: Montar Beta a partir de development
-        run: python3 _dev/prepare_release.py _dev _dev/_beta_site "${BETA_LABEL}"
-
-      - name: Montar Oficial a partir de stable
-        run: python3 _dev/prepare_release.py _stable _dev/_stable_site "${STABLE_RELEASE}"
-
-      - name: Criar Oficial Beta Menu Diagnóstico e proteção de runtime
+      - name: Montar somente a Oficial a partir de stable
+        if: env.PUBLICATION_TARGET == 'official'
         run: |
-          cd _dev
-          STABLE_RELEASE=${STABLE_RELEASE} BETA_LABEL=${BETA_LABEL} python3 prepare_environments.py
-          python3 finalize_public_metadata.py
-          STABLE_RELEASE=${STABLE_RELEASE} python3 prepare_version_history.py
+          python3 _source/prepare_release.py _source _source/_release_source "${PUBLICATION_RELEASE}"
+          python3 _source/prepare_isolated_publication.py build-official \
+            --source _source/_release_source \
+            --public . \
+            --output _source/_publication_official \
+            --release "${PUBLICATION_RELEASE}"
 
-      - name: Validar manual PWA iPhone antes de tocar na main
+      - name: Validar e sincronizar exclusivamente o ambiente acionado
         run: |
-          test -s _dev/site/index.html
-          test -s _dev/site/menu.html
-          test -s _dev/site/menu/index.html
-          test -s _dev/site/diagnostico/index.html
-          test -s _dev/site/launch.html
-          test -s _dev/site/recover.html
-          test -s _dev/site/safe.html
-          test -s _dev/site/beta/index.html
-          test -s _dev/site/beta/launch.html
-          test -s _dev/site/beta/recover.html
-          test -s _dev/site/beta/safe.html
-          test -s _dev/site/versoes/index.html
-          test -s _dev/site/versoes/0.8.0/index.html
-          test -s _dev/site/versoes/0.8.8/index.html
-          test -s _dev/site/historico-versoes.html
-          grep -q "const DB_NAME='cronometro_local_v1';" _dev/site/cronometro-v080-01.js
-          grep -q "const DB_NAME='cronometro_beta_v1';" _dev/site/beta/cronometro-v080-01.js
-          ! grep -q "const DB_NAME='cronometro_local_v1';" _dev/site/beta/cronometro-v080-01.js
-          grep -q 'Cronômetro Beta' _dev/site/beta/index.html
-          grep -q '__CRONOMETRO_DISABLE_SW__=true' _dev/site/beta/index.html
-          grep -q '!window.__CRONOMETRO_DISABLE_SW__' _dev/site/beta/cronometro-v080-09.js
-          test -s _dev/site/boot-resilient.js
-          test -s _dev/site/beta/boot-resilient.js
-          grep -q 'boot-resilient.js' _dev/site/index.html
-          grep -q 'boot-resilient.js' _dev/site/beta/index.html
-          test -s _dev/site/apple-touch-icon.png
-          test -s _dev/site/app-icon-192.png
-          test -s _dev/site/app-icon-512.png
-          test -s _dev/site/beta/apple-touch-icon-beta.png
-          test -s _dev/site/beta/app-icon-beta-192.png
-          test -s _dev/site/beta/app-icon-beta-512.png
-          grep -q 'apple-touch-icon.png' _dev/site/index.html
-          grep -q 'apple-touch-icon-beta.png' _dev/site/beta/index.html
-          grep -q 'app-icon-512.png' _dev/site/manifest.webmanifest
-          grep -q 'app-icon-beta-512.png' _dev/site/beta/manifest.webmanifest
-          grep -q '"start_url": "./"' _dev/site/manifest.webmanifest
-          grep -q '"start_url": "./"' _dev/site/beta/manifest.webmanifest
-          ! grep -q 'v0.8.1' _dev/site/manifest.webmanifest
-          ! grep -q 'v0.8.1' _dev/site/beta/manifest.webmanifest
-          grep -q 'Central de Diagnóstico' _dev/site/menu.html
-          grep -q 'repeat(2,minmax(0,1fr))' _dev/site/menu.html
-          grep -q 'overflow-x:hidden' _dev/site/menu.html
-          ! grep -q 'cronometro-v080-01.js' _dev/site/menu.html
-          ! grep -q 'href="../' _dev/site/menu.html
-          grep -q 'Histórico de versões' _dev/site/menu.html
-          grep -q 'cronometro_archive_080' _dev/site/versoes/0.8.0/cronometro-v080-01.js
-          grep -q 'cronometro_archive_088' _dev/site/versoes/0.8.8/cronometro-v080-01.js
-          grep -q '__CRONOMETRO_ARCHIVE__=true' _dev/site/versoes/0.8.8/index.html
-          grep -q 'Páginas reais nunca recebem index.html' _dev/site/sw.js
-          grep -q 'menu.html' _dev/site/sw.js
-          grep -q "rel.startsWith('beta/')" _dev/site/sw.js
-          grep -q "rel.startsWith('versoes/')" _dev/site/sw.js
-          grep -q 'Registrations reais' _dev/site/diagnostico/index.html
-          grep -q 'Caches do Cronômetro' _dev/site/diagnostico/index.html
-          grep -q 'controller residual' _dev/site/diagnostico/index.html
-          ! grep -q 'indexedDB.deleteDatabase' _dev/site/recover.html
-          ! grep -q 'localStorage.clear' _dev/site/recover.html
-          echo "Manual validado: Oficial ${STABLE_RELEASE}; Beta ${BETA_LABEL}; main pronta para publicação."
+          if [ "${PUBLICATION_TARGET}" = beta ]; then
+            python3 _source/prepare_isolated_publication.py sync-beta \
+              --built _source/_publication_beta \
+              --public .
+          else
+            python3 _source/prepare_isolated_publication.py sync-official \
+              --candidate _source/_publication_official \
+              --public .
+          fi
+          rm -rf _source
 
-      - name: Substituir os arquivos públicos da main pelo pacote validado
+      - name: Provar isolamento no diff preparado
         run: |
-          find . -mindepth 1 -maxdepth 1 \
-            ! -name .git \
-            ! -name .github \
-            ! -name _dev \
-            ! -name _stable \
-            -exec rm -rf {} +
-          cp -a _dev/site/. ./
-          rm -rf _dev _stable
+          git add -A
+          python3 - <<'PY'
+          import os, subprocess
+          target=os.environ['PUBLICATION_TARGET']
+          changed=[line for line in subprocess.check_output(
+              ['git','diff','--cached','--name-only','-z']
+          ).decode().split('\0') if line]
+          if target=='beta':
+              invalid=[path for path in changed if not path.startswith('beta/')]
+              if invalid:
+                  raise SystemExit('Publicação Beta tentou alterar a Oficial: '+', '.join(invalid))
+          else:
+              invalid=[path for path in changed if path.startswith('beta/')]
+              if invalid:
+                  raise SystemExit('Publicação Oficial tentou alterar a Beta: '+', '.join(invalid))
+          print(f'Isolamento confirmado para {target}: {len(changed)} arquivo(s) alterado(s).')
+          PY
 
-      - name: Confirmar que a própria main contém o site servido
+      - name: Confirmar pacote público resultante
         run: |
           test -s index.html
-          test -s menu.html
-          test -s menu/index.html
-          test -s diagnostico/index.html
           test -s beta/index.html
-          test -s versoes/index.html
-          test -s versoes/0.8.0/index.html
-          test -s versoes/0.8.8/index.html
-          test -s apple-touch-icon.png
-          test -s beta/apple-touch-icon-beta.png
           grep -q "const DB_NAME='cronometro_local_v1';" cronometro-v080-01.js
           grep -q "const DB_NAME='cronometro_beta_v1';" beta/cronometro-v080-01.js
-          grep -q "${BETA_LABEL}" beta/version.json
-          ! grep -q 'v0.8.1' manifest.webmanifest
-          ! grep -q 'v0.8.1' beta/manifest.webmanifest
-          echo "main contém exatamente o site que o GitHub Pages servirá."
+          ! grep -q "const DB_NAME='cronometro_local_v1';" beta/cronometro-v080-01.js
+          if [ "${PUBLICATION_TARGET}" = beta ]; then
+            grep -q "${PUBLICATION_RELEASE}" beta/version.json
+            grep -q 'cronometro-v092-advanced-analytics.js' beta/index.html
+            ! grep -q 'analytics-ui.js' beta/index.html
+          else
+            grep -q "${PUBLICATION_RELEASE}" version.json
+          fi
 
-      - name: Gravar pacote público na main
+      - name: Gravar somente o ambiente autorizado na main
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
           if git diff --cached --quiet; then
-            echo "Nenhuma alteração pública pendente."
+            echo "Nenhuma alteração pública pendente para ${PUBLICATION_TARGET}."
           else
-            git commit -m "chore(pages): publica PWA endurecida Oficial Beta Menu e Diagnóstico [skip ci]"
+            git commit -m "chore(pages): publica ${PUBLICATION_TARGET} isoladamente [skip ci]"
             git push origin main
           fi
