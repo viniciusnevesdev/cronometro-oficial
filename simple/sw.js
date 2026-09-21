@@ -49,6 +49,8 @@ const ASSETS=[
   "./cronometro-v090-settings.js",
   "./cronometro-v091-client-directory.css",
   "./cronometro-v091-client-directory.js",
+  "./cronometro-v092-advanced-analytics.css",
+  "./cronometro-v092-advanced-analytics.js",
   "./environment.json",
   "./environments.json",
   "./estrutura.svg",
