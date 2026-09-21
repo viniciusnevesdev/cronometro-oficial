@@ -55,8 +55,6 @@ Arquivos auxiliares relevantes:
 - `boot-resilient.js`: inicialização com fallback para diagnóstico/modo
   seguro, sem alterar IndexedDB;
 - `beta-tools.js`: ferramentas exclusivas da Beta;
-- `visual-lab.js` e `visual-lab-bridge.css`: Laboratório Visual exclusivo do
-  pacote Beta;
 - `launch.html`, `recover.html` e `safe.html`: páginas independentes de
   suporte;
 - `sw.js`, `manifest.webmanifest` e `app-icon-192.png`: metadados e assets da

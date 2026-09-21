@@ -189,7 +189,7 @@ def build_beta(source: Path, output: Path, release: str):
         registration.write_text(text.replace(old, new, 1), encoding='utf-8')
 
     (output / 'beta-tools.js').write_text((ROOT / 'beta-tools.js').read_text(encoding='utf-8').replace('__BETA_RELEASE__', release), encoding='utf-8')
-    for name in ('beta-patches.js', 'visual-lab.js', 'visual-lab-bridge.css'):
+    for name in ('beta-patches.js',):
         shutil.copy2(ROOT / name, output / name)
     for name in ('launch.html', 'recover.html', 'safe.html'):
         (output / name).write_text((ROOT / name).read_text(encoding='utf-8').replace('__RELEASE__', release), encoding='utf-8')
@@ -200,9 +200,7 @@ def build_beta(source: Path, output: Path, release: str):
     if 'name="robots"' not in text:
         text = text.replace('<meta charset="utf-8" />', '<meta charset="utf-8" />\n  <meta name="robots" content="noindex,nofollow" />', 1)
     if 'beta-tools.js' not in text:
-        text = text.replace('</body>', f'  <script src="./beta-tools.js?v={release}" defer></script>\n  <script src="./beta-patches.js?v={release}" defer></script>\n  <script src="./visual-lab.js?v={release}" defer></script>\n</body>', 1)
-    if 'visual-lab-bridge.css' not in text:
-        text = text.replace('</head>', f'  <link rel="stylesheet" href="./visual-lab-bridge.css?v={release}">\n</head>', 1)
+        text = text.replace('</body>', f'  <script src="./beta-tools.js?v={release}" defer></script>\n  <script src="./beta-patches.js?v={release}" defer></script>\n</body>', 1)
     index.write_text(text, encoding='utf-8')
     inject_boot(index, release, True)
     for name in ('index.html', 'launch.html', 'recover.html', 'safe.html'):

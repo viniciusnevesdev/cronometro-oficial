@@ -246,10 +246,6 @@ patch_beta_registration(beta)
 tools = (ROOT / 'beta-tools.js').read_text(encoding='utf-8').replace('__BETA_RELEASE__', BETA_LABEL)
 (beta / 'beta-tools.js').write_text(tools, encoding='utf-8')
 shutil.copy2(ROOT / 'beta-patches.js', beta / 'beta-patches.js')
-# Laboratório Visual: arquivos exclusivos do pacote Beta; nunca são copiados ao Oficial.
-shutil.copy2(ROOT / 'visual-lab.js', beta / 'visual-lab.js')
-shutil.copy2(ROOT / 'visual-lab-bridge.css', beta / 'visual-lab-bridge.css')
-
 # Suporte Beta recebe a versão mais recente das páginas independentes.
 for name in ('launch.html','recover.html','safe.html'):
     text = (ROOT / name).read_text(encoding='utf-8').replace('__RELEASE__', BETA_LABEL)
@@ -261,9 +257,7 @@ idx = idx.replace('content="Cronômetro"','content="Cronômetro Beta"')
 if 'name="robots"' not in idx:
     idx = idx.replace('<meta charset="utf-8" />','<meta charset="utf-8" />\n  <meta name="robots" content="noindex,nofollow" />',1)
 if 'beta-tools.js' not in idx:
-    idx = idx.replace('</body>',f'  <script src="./beta-tools.js?v={BETA_LABEL}" defer></script>\n  <script src="./beta-patches.js?v={BETA_LABEL}" defer></script>\n  <script src="./visual-lab.js?v={BETA_LABEL}" defer></script>\n</body>',1)
-if 'visual-lab-bridge.css' not in idx:
-    idx = idx.replace('</head>',f'  <link rel="stylesheet" href="./visual-lab-bridge.css?v={BETA_LABEL}">\n</head>',1)
+    idx = idx.replace('</body>',f'  <script src="./beta-tools.js?v={BETA_LABEL}" defer></script>\n  <script src="./beta-patches.js?v={BETA_LABEL}" defer></script>\n</body>',1)
 (beta / 'index.html').write_text(idx, encoding='utf-8')
 inject_boot(beta / 'index.html', BETA_LABEL, True)
 for name in ('index.html','launch.html','recover.html','safe.html'):
