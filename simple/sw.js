@@ -68,9 +68,7 @@ const ASSETS=[
   "./simple-mode.js",
   "./styles-v080-01.css",
   "./styles.css",
-  "./version.json",
-  "./visual-lab-bridge.css",
-  "./visual-lab.js"
+  "./version.json"
 ];
 const SCOPE_PATH=new URL(self.registration.scope).pathname;
 
