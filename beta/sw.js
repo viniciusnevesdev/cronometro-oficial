@@ -10,6 +10,7 @@ const ASSETS=[
   "./app-icon-beta-192.png",
   "./app-icon-beta-512.png",
   "./apple-touch-icon-beta.png",
+  "./beta-demo-data.json",
   "./beta-patches.js",
   "./beta-tools.js",
   "./boot-resilient.js",
