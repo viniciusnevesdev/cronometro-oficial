@@ -18,6 +18,7 @@ PROTECTED_PUBLIC_NAMES = {
     '.codex-reports', '.git', '.github', '.official-assets.json',
     '_source', 'ambientes.json', 'beta', 'CNAME', 'diagnostico',
     'historico-versoes.html', 'menu', 'menu.html', 'simple', 'versoes',
+    'beta-demo-data.json', 'beta-tools.js', 'beta-patches.js',
 }
 OFFICIAL_ASSET_SUFFIXES = {'.html', '.css', '.js', '.json', '.webmanifest', '.svg', '.png', '.txt'}
 
