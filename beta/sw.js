@@ -1,15 +1,15 @@
 'use strict';
-const CACHE="cronometro-beta-0.8.9-beta.22-public-2";
+const CACHE="cronometro-beta-0.8.9-beta.22-public-3-beta-icon-20260925";
 const BETA_MODE=true;
 const ASSETS=[
   "./",
   "./AI_RULES_MIN.txt",
   "./DEVELOPMENT.txt",
   "./THIRD_PARTY_NOTICES.txt",
-  "./app-icon-192.png",
-  "./app-icon-beta-192.png",
-  "./app-icon-beta-512.png",
-  "./apple-touch-icon-beta.png",
+  "./app-icon-192.png?v=beta-icon-20260925",
+  "./app-icon-beta-192.png?v=beta-icon-20260925",
+  "./app-icon-beta-512.png?v=beta-icon-20260925",
+  "./apple-touch-icon-beta.png?v=beta-icon-20260925",
   "./beta-demo-data.json",
   "./beta-patches.js",
   "./beta-tools.js",
@@ -57,7 +57,7 @@ const ASSETS=[
   "./environment.json",
   "./environments.json",
   "./estrutura.svg",
-  "./icon.svg",
+  "./icon.svg?v=beta-icon-20260925",
   "./index.html",
   "./initial-data.json",
   "./jszip.min.js",
