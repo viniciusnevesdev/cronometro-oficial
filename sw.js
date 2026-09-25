@@ -1,5 +1,5 @@
 'use strict';
-const CACHE="cronometro-official-0.8.9-public-2";
+const CACHE="cronometro-official-0.8.9-public-3-official-icon-20260925";
 const BETA_MODE=false;
 const ASSETS=[
   "./",
@@ -7,10 +7,10 @@ const ASSETS=[
   "./THIRD_PARTY_NOTICES.txt",
   "./analytics-ui.js",
   "./analytics.css",
-  "./app-icon-192.png",
-  "./app-icon-512.png",
+  "./app-icon-192.png?v=official-icon-20260925",
+  "./app-icon-512.png?v=official-icon-20260925",
   "./app.js",
-  "./apple-touch-icon.png",
+  "./apple-touch-icon.png?v=official-icon-20260925",
   "./boot-resilient.js",
   "./cronometro-v080-01.css",
   "./cronometro-v080-01.js",
@@ -50,7 +50,7 @@ const ASSETS=[
   "./cronometro-v089-legacy-client-migration.js",
   "./design-config.js",
   "./environment.json",
-  "./icon.svg",
+  "./icon.svg?v=official-icon-20260925",
   "./index.html",
   "./initial-data.json",
   "./jszip.min.js",
