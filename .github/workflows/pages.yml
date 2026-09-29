@@ -73,6 +73,10 @@ jobs:
           ! grep -q 'href="../' _dev/site/menu.html
           echo "Pacote validado: Oficial ${STABLE_RELEASE}; Beta ${BETA_LABEL}; Menu e Diagnóstico presentes."
 
+      - name: Preservar apps v2 e menu atual
+        run: |
+          cp menu.html _dev/_menu_v2.html
+
       - name: Substituir os arquivos públicos da main pelo pacote validado
         run: |
           find . -mindepth 1 -maxdepth 1 \
@@ -80,8 +84,16 @@ jobs:
             ! -name .github \
             ! -name _dev \
             ! -name _stable \
+            ! -name shared \
+            ! -name areas-beta \
+            ! -name clientes-beta \
             -exec rm -rf {} +
           cp -a _dev/site/. ./
+          cp _dev/_menu_v2.html menu.html
+          mkdir -p menu
+          cat > menu/index.html <<'EOF'
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=../menu.html"><title>Menu · Cronômetros</title></head><body><script>location.replace("../menu.html");</script></body></html>
+EOF
           rm -rf _dev _stable
 
       - name: Confirmar que a própria main contém o site servido
@@ -92,6 +104,11 @@ jobs:
           test -s diagnostico/index.html
           test -s beta/index.html
           test -s beta/app-icon-beta-192.png
+          test -s areas-beta/index.html
+          test -s clientes-beta/index.html
+          test -s shared/v2-app.js
+          grep -q 'Clientes • BETA' menu.html
+          grep -q 'Áreas • BETA' menu.html
           grep -q "const DB_NAME='cronometro_local_v1';" cronometro-v080-01.js
           grep -q "const DB_NAME='cronometro_beta_v1';" beta/cronometro-v080-01.js
           echo "main pronta para o GitHub Pages."
